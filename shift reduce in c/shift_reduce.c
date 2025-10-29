@@ -1,17 +1,21 @@
 #include <stdio.h>
 #include <string.h>
 
-// Global variables
-int k = 0, z = 0, i = 0, j = 0, length = 0;
-char input[16], actionStr[20], stack[15], action[10];
+// ---------------------------
+// Global Variables
+// ---------------------------
+int i = 0, j = 0, z = 0, length = 0;
+char input[32], stack[32], action[16], reduceMsg[32];
 FILE *inp;
 
-// Function prototype
+// Function Declaration
 void check();
 
-// Main function
+// ---------------------------
+// Main Function
+// ---------------------------
 int main() {
-    printf("GRAMMAR is:\n");
+    printf("GRAMMAR:\n");
     printf("E -> E + E\n");
     printf("E -> E * E\n");
     printf("E -> (E)\n");
@@ -19,7 +23,7 @@ int main() {
 
     inp = fopen("input.txt", "r");
     if (inp == NULL) {
-        printf("Error: Cannot open input file.\n");
+        printf("Error: Could not open input.txt\n");
         return 1;
     }
 
@@ -31,9 +35,11 @@ int main() {
 
     printf("STACK\t\tINPUT\t\tACTION\n");
 
-    // Parsing logic
-    for (k = 0, i = 0; j < length; k++, i++, j++) {
-        // If current token is 'id'
+    // ---------------------------
+    // Shift phase
+    // ---------------------------
+    for (i = 0, j = 0; j < length; i++, j++) {
+        // If token is "id"
         if (input[j] == 'i' && input[j + 1] == 'd') {
             stack[i] = input[j];
             stack[i + 1] = input[j + 1];
@@ -44,6 +50,8 @@ int main() {
 
             printf("\n$%s\t\t%s$\t%sid", stack, input, action);
             check();
+
+            j++; // Skip the next character ('d') of "id"
         } 
         else {
             // Shift single symbol
@@ -58,26 +66,29 @@ int main() {
 
     printf("\n");
 
-    // Final result
+    // ---------------------------
+    // Final validation
+    // ---------------------------
     if (strcmp(stack, "E") == 0)
-        printf("\nExpression is valid!\n");
+        printf("\n✅ Expression is valid!\n");
     else
-        printf("\nNot a valid expression!\n");
+        printf("\n❌ Not a valid expression!\n");
 
     return 0;
 }
 
-// Function to check and reduce according to grammar
+// ---------------------------
+// Reduction Function
+// ---------------------------
 void check() {
-    strcpy(actionStr, "REDUCE TO E");
+    strcpy(reduceMsg, "REDUCE TO E");
 
     // Rule: E -> id
     for (z = 0; z < length; z++) {
         if (stack[z] == 'i' && stack[z + 1] == 'd') {
             stack[z] = 'E';
             stack[z + 1] = '\0';
-            printf("\n$%s\t\t%s$\t%s", stack, input, actionStr);
-            j++;
+            printf("\n$%s\t\t%s$\t%s", stack, input, reduceMsg);
         }
     }
 
@@ -85,10 +96,8 @@ void check() {
     for (z = 0; z < length; z++) {
         if (stack[z] == 'E' && stack[z + 1] == '+' && stack[z + 2] == 'E') {
             stack[z] = 'E';
-            stack[z + 1] = '\0';
-            stack[z + 2] = '\0';
-            printf("\n$%s\t\t%s$\t%s", stack, input, actionStr);
-            i = i - 2;
+            stack[z + 1] = stack[z + 2] = '\0';
+            printf("\n$%s\t\t%s$\t%s", stack, input, reduceMsg);
         }
     }
 
@@ -96,10 +105,8 @@ void check() {
     for (z = 0; z < length; z++) {
         if (stack[z] == 'E' && stack[z + 1] == '*' && stack[z + 2] == 'E') {
             stack[z] = 'E';
-            stack[z + 1] = '\0';
-            stack[z + 2] = '\0';
-            printf("\n$%s\t\t%s$\t%s", stack, input, actionStr);
-            i = i - 2;
+            stack[z + 1] = stack[z + 2] = '\0';
+            printf("\n$%s\t\t%s$\t%s", stack, input, reduceMsg);
         }
     }
 
@@ -107,10 +114,9 @@ void check() {
     for (z = 0; z < length; z++) {
         if (stack[z] == '(' && stack[z + 1] == 'E' && stack[z + 2] == ')') {
             stack[z] = 'E';
-            stack[z + 1] = '\0';
-            stack[z + 2] = '\0';
-            printf("\n$%s\t\t%s$\t%s", stack, input, actionStr);
-            i = i - 2;
+            stack[z + 1] = stack[z + 2] = '\0';
+            printf("\n$%s\t\t%s$\t%s", stack, input, reduceMsg);
         }
     }
 }
+
